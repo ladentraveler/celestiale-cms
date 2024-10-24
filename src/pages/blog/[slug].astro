@@ -1,0 +1,32 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { fetchPostBySlug } from '../../lib/api';
+import { marked } from 'marked';
+
+const { slug } = Astro.params;
+const post = await fetchPostBySlug(slug);
+
+if (!post) {
+  return Astro.redirect('/404');
+}
+
+const content = marked(post.attributes.content);
+---
+
+<Layout title={post.attributes.title}>
+  <main class="max-w-4xl mx-auto px-4 py-8">
+    <article>
+      <h1 class="text-4xl font-bold mb-4">{post.attributes.title}</h1>
+      
+      <div class="flex gap-4 text-gray-400 mb-8">
+        <span>By {post.attributes.author.data.attributes.name}</span>
+        <span>•</span>
+        <span>{new Date(post.attributes.publishedAt).toLocaleDateString()}</span>
+        <span>•</span>
+        <span>{post.attributes.category.data.attributes.name}</span>
+      </div>
+
+      <div class="prose prose-invert max-w-none" set:html={content} />
+    </article>
+  </main>
+</Layout>

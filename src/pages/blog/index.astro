@@ -1,0 +1,48 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { fetchPosts } from '../../lib/api';
+
+const page = Number(Astro.url.searchParams.get('page')) || 1;
+const pageSize = 10;
+
+const { data: posts, meta } = await fetchPosts(page, pageSize);
+---
+
+<Layout title="Blog">
+  <main class="max-w-4xl mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-8">Blog Posts</h1>
+    
+    <div class="grid gap-8">
+      {posts.map((post) => (
+        <article class="border border-gray-200 rounded-lg p-6">
+          <h2 class="text-2xl font-bold mb-2">
+            <a href={`/blog/${post.attributes.slug}`} class="text-gradient hover:opacity-80">
+              {post.attributes.title}
+            </a>
+          </h2>
+          <p class="text-gray-400 mb-4">
+            {new Date(post.attributes.publishedAt).toLocaleDateString()}
+          </p>
+          <p class="text-gray-200">
+            {post.attributes.content.substring(0, 200)}...
+          </p>
+        </article>
+      ))}
+    </div>
+
+    {meta.pagination.pageCount > 1 && (
+      <div class="flex justify-center gap-4 mt-8">
+        {page > 1 && (
+          <a href={`/blog?page=${page - 1}`} class="px-4 py-2 bg-purple-600 rounded">
+            Previous
+          </a>
+        )}
+        {page < meta.pagination.pageCount && (
+          <a href={`/blog?page=${page + 1}`} class="px-4 py-2 bg-purple-600 rounded">
+            Next
+          </a>
+        )}
+      </div>
+    )}
+  </main>
+</Layout>
